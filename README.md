@@ -64,4 +64,46 @@ Use the absolute path from `which`: Claude Desktop doesn't load your shell's PAT
 
 Optional environment variables (add an `"env": {...}` block):
 - `LOGIC_MCP_EXPORT_DIR`: where `.mid` files go (default `~/Music/Logic MCP Exports`)
--
+- `LOGIC_MCP_PORT`: MIDI port name to match (default `IAC`)
+
+### 4. Set up Logic
+- Create a **Software Instrument** track and select it. Logic sends incoming MIDI from any input to the selected track.
+- For drums, load **Drum Machine Designer** (Electronic Drum Kit) or **Drum Kit Designer**.
+- To capture what Claude plays: arm the track, press **R** to record, then ask Claude to play. Set Logic's tempo to match the `bpm` you ask for.
+- Exported `.mid` files: drag them from Finder into the tracks area.
+
+## Try it
+
+> "Play a four-on-the-floor house beat at 124 BPM with offbeat open hats and a clap on 2 and 4."
+
+> "Export an Am7 – Fmaj7 – C – G progression as offbeat house stabs, 4 repeats, to a file called verse-chords."
+
+> "Write a syncopated bassline in A minor that follows those chords and save it as bass."
+
+## Security notes
+
+- The server only does two things: send MIDI to one local port, and write `.mid` files to one folder.
+- Filenames are sanitized and the final path is checked to stay inside the export folder, so a request like `../../.zshrc` can't write elsewhere (see `tests/test_theory.py`).
+- Playback is capped at 180 seconds per call, and an all-notes-off is always sent afterwards so nothing gets stuck.
+- Stage 1 needs **no** Accessibility permissions. Later stages will, and they'll be scoped and documented when added.
+
+## Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| "No MIDI output matching 'IAC'" | IAC Driver isn't online (step 1) |
+| "MIDI backend missing" | `pip install python-rtmidi` inside the venv |
+| Tools don't appear in Claude | Check the absolute path, then fully quit/reopen Claude Desktop. Logs: `~/Library/Logs/Claude/mcp-server-logic-pro.log` |
+| Notes play but no sound | Select a Software Instrument track in Logic |
+| Notes are stuck | Ask Claude to run `panic` |
+
+## Roadmap
+
+- [x] **Stage 1:** MIDI: notes, chord progressions, drum patterns, `.mid` export
+- [ ] **Stage 2:** Transport (play, stop, record, tempo) and track setup
+- [ ] **Stage 3:** Mixer control (volume, pan, mute, solo) via Mackie Control / OSC
+
+## License
+
+PolyForm Noncommercial 1.0.0. Free for personal and noncommercial use.
+For commercial use, contact me. See [LICENSE](LICENSE).
